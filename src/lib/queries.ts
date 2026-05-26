@@ -1,4 +1,5 @@
 import { and, desc, eq, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { db } from "@/db";
 import {
   brokerCommissions,
@@ -249,4 +250,52 @@ export async function getAdminAccounts(): Promise<AdminAccountRow[]> {
     .innerJoin(users, eq(users.id, clientAccounts.userId))
     .orderBy(desc(clientAccounts.availableBalance));
   return rows;
+}
+
+/* ── Gestión de usuarios (admin) ───────────────────────────────── */
+
+export type UserRow = {
+  id: string;
+  name: string | null;
+  email: string;
+  role: "admin" | "broker" | "user";
+  isActive: boolean;
+  brokerName: string | null;
+  createdAt: Date;
+};
+
+export async function getAllUsers(): Promise<UserRow[]> {
+  const brokerUser = alias(users, "broker_user");
+  const rows = await db
+    .select({
+      id: users.id,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      isActive: users.isActive,
+      brokerName: brokerUser.name,
+      brokerEmail: brokerUser.email,
+      createdAt: users.createdAt,
+    })
+    .from(users)
+    .leftJoin(brokerUser, eq(brokerUser.id, users.brokerId))
+    .orderBy(users.role, users.createdAt);
+
+  return rows.map((r) => ({
+    id: r.id,
+    name: r.name,
+    email: r.email,
+    role: r.role,
+    isActive: r.isActive,
+    brokerName: r.brokerName ?? r.brokerEmail ?? null,
+    createdAt: r.createdAt,
+  }));
+}
+
+export async function getBrokersList(): Promise<{ id: string; name: string | null; email: string }[]> {
+  return db
+    .select({ id: users.id, name: users.name, email: users.email })
+    .from(users)
+    .where(eq(users.role, "broker"))
+    .orderBy(users.name);
 }
