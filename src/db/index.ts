@@ -1,12 +1,14 @@
-import { Pool } from "@neondatabase/serverless";
+import { Pool, neonConfig } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-serverless";
+import ws from "ws";
 import * as schema from "./schema";
 
 /**
  * Cliente de base de datos (Neon serverless con WebSocket → soporta
  * transacciones interactivas, necesarias para el ledger de doble entrada).
- * En Node 22+ el WebSocket global está disponible, así que no requiere `ws`.
+ * En Node.js hay que pasarle un constructor de WebSocket explícito.
  */
+neonConfig.webSocketConstructor = ws;
 
 const globalForDb = globalThis as unknown as { __mantisPool?: Pool };
 

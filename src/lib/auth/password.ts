@@ -1,0 +1,24 @@
+import { randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+
+/**
+ * Hashing de contraseñas con scrypt (incluido en Node, sin dependencias).
+ * Formato almacenado: `scrypt$<saltB64>$<hashB64>`.
+ */
+
+const KEYLEN = 64;
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16);
+  const hash = scryptSync(password, salt, KEYLEN);
+  return `scrypt$${salt.toString("base64")}$${hash.toString("base64")}`;
+}
+
+export function verifyPassword(password: string, stored: string | null | undefined): boolean {
+  if (!stored) return false;
+  const [scheme, saltB64, hashB64] = stored.split("$");
+  if (scheme !== "scrypt" || !saltB64 || !hashB64) return false;
+  const salt = Buffer.from(saltB64, "base64");
+  const expected = Buffer.from(hashB64, "base64");
+  const actual = scryptSync(password, salt, expected.length);
+  return expected.length === actual.length && timingSafeEqual(expected, actual);
+}

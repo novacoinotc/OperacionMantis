@@ -10,7 +10,8 @@ export default defineConfig({
   dialect: "postgresql",
   casing: "snake_case",
   dbCredentials: {
-    url: process.env.DATABASE_URL ?? "",
+    // Conexión directa (sin pgbouncer) para DDL/migraciones.
+    url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL ?? "",
   },
   verbose: true,
   strict: true,
