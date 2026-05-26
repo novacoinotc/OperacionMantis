@@ -56,10 +56,14 @@ export function TopNav({
         </nav>
 
         <div className="ml-auto flex items-center gap-3">
-          <div className="hidden text-right sm:block">
+          <Link
+            href="/cuenta"
+            className="hidden text-right transition-opacity hover:opacity-80 sm:block"
+            title="Mi cuenta · cambiar contraseña"
+          >
             <div className="text-sm leading-tight font-medium">{user.name ?? user.email}</div>
             <div className="text-xs text-muted-foreground">{ROLE_LABEL[user.role] ?? user.role}</div>
-          </div>
+          </Link>
           <form action={logoutAction}>
             <Button variant="ghost" size="sm" type="submit">
               Salir

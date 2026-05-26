@@ -28,19 +28,8 @@ export default async function AdminUsuariosPage() {
   const [allUsers, brokers] = await Promise.all([getAllUsers(), getBrokersList()]);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <Reveal>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Crear usuario</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <UserForms brokers={brokers} />
-          </CardContent>
-        </Card>
-      </Reveal>
-
-      <Reveal delay={0.1}>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Usuarios ({allUsers.length})</CardTitle>
@@ -75,6 +64,25 @@ export default async function AdminUsuariosPage() {
             </Table>
           </CardContent>
         </Card>
+      </Reveal>
+
+      <Reveal delay={0.05}>
+        <details className="group rounded-xl border border-border/60 bg-card/40">
+          <summary className="flex cursor-pointer items-center justify-between px-5 py-4 text-sm font-medium select-none">
+            <span>Crear usuario o broker</span>
+            <span className="text-xs text-muted-foreground group-open:hidden">
+              Mostrar (avanzado) ▾
+            </span>
+            <span className="hidden text-xs text-muted-foreground group-open:inline">Ocultar ▴</span>
+          </summary>
+          <div className="border-t border-border/60 p-5">
+            <p className="mb-4 text-xs text-muted-foreground">
+              Alta avanzada: crea un broker, o un cliente con sus credenciales de NovaCore. Solo
+              necesario al onboarding de un cliente nuevo.
+            </p>
+            <UserForms brokers={brokers} />
+          </div>
+        </details>
       </Reveal>
     </div>
   );

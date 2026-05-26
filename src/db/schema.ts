@@ -46,6 +46,9 @@ export const ledgerAccount = pgEnum("ledger_account", [
 
 export const commissionStatus = pgEnum("commission_status", ["accrued", "paid"]);
 
+export const payoutMethod = pgEnum("payout_method", ["spei", "crypto"]);
+export const payoutStatus = pgEnum("payout_status", ["pending", "paid", "rejected"]);
+
 /* ────────────────────────────  Users  ──────────────────────────── */
 
 export const users = pgTable(
@@ -237,6 +240,32 @@ export const brokerCommissions = pgTable(
     index("broker_commissions_broker_idx").on(t.brokerUserId),
     index("broker_commissions_status_idx").on(t.status),
   ],
+);
+
+/* ──────────────────────  Broker payouts  ───────────────────────── */
+/* Solicitud del broker para cobrar sus comisiones acumuladas. */
+
+export const brokerPayouts = pgTable(
+  "broker_payouts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    brokerUserId: uuid("broker_user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    method: payoutMethod("method").notNull(),
+    amount: bigint("amount", { mode: "number" }).notNull(), // centavos
+    destinationClabe: text("destination_clabe"),
+    destinationName: text("destination_name"),
+    destinationAddress: text("destination_address"),
+    destinationNetwork: text("destination_network"),
+    status: payoutStatus("status").notNull().default("pending"),
+    txHash: text("tx_hash"),
+    reference: text("reference"),
+    processedByUserId: uuid("processed_by_user_id").references(() => users.id),
+    processedAt: timestamp("processed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [index("broker_payouts_broker_idx").on(t.brokerUserId, t.status)],
 );
 
 /* ────────────────────────  USDT quotes  ────────────────────────── */

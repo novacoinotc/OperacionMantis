@@ -30,6 +30,16 @@ export type Movement = {
   status: string;
   detail: string;
   clabe: string | null; // CLABE de entrada (depósitos)
+  // ── Detalle ──
+  reference: string | null; // trackingKey (depósito) o externalReference (retiro)
+  trackingKey: string | null; // clave de rastreo de NovaCore
+  counterparty: string | null; // pagador (depósito) o beneficiario (retiro)
+  counterpartyAccount: string | null;
+  concept: string | null;
+  usdtAmount: number | null; // micro-USDT
+  usdtRate: string | null;
+  usdtAddress: string | null;
+  usdtTxHash: string | null;
 };
 
 /**
@@ -66,10 +76,21 @@ export async function getClientMovements(
       id: d.id,
       kind: "deposit" as const,
       date: d.receivedAt ?? d.createdAt,
-      amount: d.netAmount, // NUNCA el bruto
+      // El cliente ve el depósito TAL CUAL llegó (bruto), para que cuadre con su
+      // comprobante. La comisión se refleja solo en el saldo disponible (neto).
+      amount: d.grossAmount,
       status: "settled",
       detail: d.payerName || "Depósito SPEI",
       clabe: d.beneficiaryAccount,
+      reference: d.trackingKey,
+      trackingKey: d.trackingKey,
+      counterparty: d.payerName,
+      counterpartyAccount: d.payerAccount,
+      concept: d.concept,
+      usdtAmount: null,
+      usdtRate: null,
+      usdtAddress: null,
+      usdtTxHash: null,
     })),
     ...wds.map((w) => ({
       id: w.id,
@@ -82,6 +103,15 @@ export async function getClientMovements(
           ? `Retiro SPEI · ${w.beneficiaryName || w.beneficiaryAccount || ""}`
           : "Conversión a USDT",
       clabe: null,
+      reference: w.externalReference,
+      trackingKey: w.novacoreTrackingKey,
+      counterparty: w.beneficiaryName,
+      counterpartyAccount: w.beneficiaryAccount,
+      concept: w.concept,
+      usdtAmount: w.usdtAmount,
+      usdtRate: w.effectiveRate,
+      usdtAddress: w.usdtAddress,
+      usdtTxHash: w.usdtTxHash,
     })),
   ];
 
@@ -145,6 +175,25 @@ export async function getBrokerStats(brokerId: string): Promise<BrokerStats> {
     commissionAccrued: Number(comm?.accrued ?? 0),
     commissionPaid: Number(comm?.paid ?? 0),
   };
+}
+
+/** Detalle de un cliente para el broker. Solo si el cliente le pertenece. */
+export async function getBrokerClientDetail(brokerId: string, clientUserId: string) {
+  const [row] = await db
+    .select({
+      userId: users.id,
+      name: users.name,
+      email: users.email,
+      accountId: clientAccounts.id,
+      availableBalance: clientAccounts.availableBalance,
+    })
+    .from(users)
+    .innerJoin(clientAccounts, eq(clientAccounts.userId, users.id))
+    .where(
+      and(eq(users.id, clientUserId), eq(users.brokerId, brokerId), eq(users.role, "user")),
+    )
+    .limit(1);
+  return row ?? null;
 }
 
 /* ── Admin ─────────────────────────────────────────────────────── */
@@ -262,6 +311,40 @@ export async function getAdminAccounts(): Promise<AdminAccountRow[]> {
     .innerJoin(users, eq(users.id, clientAccounts.userId))
     .orderBy(desc(clientAccounts.availableBalance));
   return rows;
+}
+
+export type AdminDepositRow = {
+  id: string;
+  payerName: string | null;
+  beneficiaryAccount: string | null;
+  grossAmount: number;
+  commissionAmount: number;
+  netAmount: number;
+  commissionBps: number;
+  receivedAt: Date | null;
+  clientName: string | null;
+  clientEmail: string;
+};
+
+export async function getAdminDeposits(limit = 100): Promise<AdminDepositRow[]> {
+  return db
+    .select({
+      id: deposits.id,
+      payerName: deposits.payerName,
+      beneficiaryAccount: deposits.beneficiaryAccount,
+      grossAmount: deposits.grossAmount,
+      commissionAmount: deposits.commissionAmount,
+      netAmount: deposits.netAmount,
+      commissionBps: deposits.commissionBps,
+      receivedAt: deposits.receivedAt,
+      clientName: users.name,
+      clientEmail: users.email,
+    })
+    .from(deposits)
+    .innerJoin(clientAccounts, eq(clientAccounts.id, deposits.clientAccountId))
+    .innerJoin(users, eq(users.id, clientAccounts.userId))
+    .orderBy(desc(deposits.createdAt))
+    .limit(limit);
 }
 
 /* ── Gestión de usuarios (admin) ───────────────────────────────── */

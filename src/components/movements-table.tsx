@@ -12,6 +12,7 @@ import { formatMXN } from "@/lib/money";
 import { formatDateTime, statusLabel, statusVariant } from "@/lib/ui";
 import type { Movement } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+import { MovementDetailButton } from "@/components/movement-detail";
 
 const KIND_META = {
   deposit: { label: "Ingreso", Icon: ArrowDownLeft },
@@ -34,6 +35,7 @@ export function MovementsTable({ movements }: { movements: Movement[] }) {
           <TableHead>Fecha</TableHead>
           <TableHead>Estado</TableHead>
           <TableHead className="text-right">Monto</TableHead>
+          <TableHead className="w-0"></TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -74,6 +76,9 @@ export function MovementsTable({ movements }: { movements: Movement[] }) {
               >
                 {positive ? "+" : "−"}
                 {formatMXN(Math.abs(m.amount))}
+              </TableCell>
+              <TableCell className="text-right">
+                <MovementDetailButton m={m} />
               </TableCell>
             </TableRow>
           );

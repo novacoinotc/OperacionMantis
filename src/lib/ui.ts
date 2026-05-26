@@ -13,6 +13,7 @@ const STATUS_LABEL: Record<string, string> = {
   canceled: "Cancelado",
   failed: "Fallido",
   completed: "Completado",
+  paid: "Pagado",
 };
 
 const STATUS_VARIANT: Record<string, BadgeVariant> = {
@@ -26,6 +27,7 @@ const STATUS_VARIANT: Record<string, BadgeVariant> = {
   canceled: "outline",
   failed: "destructive",
   completed: "success",
+  paid: "success",
 };
 
 export function statusLabel(status: string): string {

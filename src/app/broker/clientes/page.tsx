@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { requireRole } from "@/lib/auth";
 import { getBrokerClients } from "@/lib/queries";
 import { formatMXN } from "@/lib/money";
@@ -43,7 +44,12 @@ export default async function BrokerClientesPage() {
                 {clients.map((c) => (
                   <TableRow key={c.userId}>
                     <TableCell>
-                      <div className="font-medium">{c.name ?? c.email}</div>
+                      <Link
+                        href={`/broker/cliente/${c.userId}`}
+                        className="font-medium hover:underline"
+                      >
+                        {c.name ?? c.email}
+                      </Link>
                       <div className="text-xs text-muted-foreground">{c.email}</div>
                     </TableCell>
                     <TableCell>

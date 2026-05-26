@@ -15,6 +15,13 @@
       "when": 1779828245791,
       "tag": "0001_grey_pepper_potts",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1779834197131,
+      "tag": "0002_open_vin_gonzales",
+      "breakpoints": true
     }
   ]
 }

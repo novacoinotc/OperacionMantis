@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Percent, Users, Wallet } from "lucide-react";
 import { requireRole } from "@/lib/auth";
 import { getBrokerClients, getBrokerStats } from "@/lib/queries";
@@ -65,7 +66,12 @@ export default async function BrokerPage() {
                   {clients.map((c) => (
                     <TableRow key={c.userId}>
                       <TableCell>
-                        <div className="font-medium">{c.name ?? c.email}</div>
+                        <Link
+                          href={`/broker/cliente/${c.userId}`}
+                          className="font-medium hover:underline"
+                        >
+                          {c.name ?? c.email}
+                        </Link>
                         <div className="text-xs text-muted-foreground">{c.email}</div>
                       </TableCell>
                       <TableCell>
@@ -74,7 +80,9 @@ export default async function BrokerPage() {
                         </Badge>
                       </TableCell>
                       <TableCell className="tabular text-right font-medium">
-                        {formatMXN(c.availableBalance)}
+                        <Link href={`/broker/cliente/${c.userId}`} className="hover:underline">
+                          {formatMXN(c.availableBalance)}
+                        </Link>
                       </TableCell>
                     </TableRow>
                   ))}

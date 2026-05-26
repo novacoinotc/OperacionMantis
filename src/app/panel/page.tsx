@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { Reveal } from "@/components/reveal";
 import { MovementsTable } from "@/components/movements-table";
+import { CopyButton } from "@/components/copy-button";
 import { cn } from "@/lib/utils";
 
 export default async function PanelPage() {
@@ -55,7 +56,32 @@ export default async function PanelPage() {
         </Card>
       </Reveal>
 
-      <Reveal delay={0.1}>
+      {account.depositClabes && account.depositClabes.length > 0 ? (
+        <Reveal delay={0.1}>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">Tus CLABEs para recibir</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                Comparte cualquiera de estas CLABEs para recibir pagos. Todo lo que entre suma a tu
+                saldo disponible.
+              </p>
+              {account.depositClabes.map((c) => (
+                <div
+                  key={c}
+                  className="flex items-center justify-between rounded-lg border border-border/60 bg-muted/20 px-3 py-2"
+                >
+                  <span className="tabular text-sm">{c}</span>
+                  <CopyButton value={c} label="Copiar CLABE" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </Reveal>
+      ) : null}
+
+      <Reveal delay={0.15}>
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Movimientos recientes</CardTitle>
