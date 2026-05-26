@@ -84,7 +84,7 @@ Todo detrás de `src/lib/novacore/` (`CoreClient` real + mock). `USE_MOCK_CORE=1
 
 ### Pendientes operativos (cuando haya cliente real)
 1. **Rotar la contraseña de Neon** (las credenciales se pegaron en el chat).
-2. Quitar `USE_MOCK_CORE=1` en prod y dar de alta el `integration_api_key` real del cliente en NovaCore (CLABE, secrets) vía panel admin — falta construir el alta de cuentas/usuarios desde la UI admin.
+2. Quitar `USE_MOCK_CORE=1` en prod cuando se cargue un cliente real. El alta de usuarios (broker + cliente con sus credenciales NovaCore cifradas) YA está en `/admin/usuarios`.
 3. Confirmar que el plan de Vercel permite el cron `*/5` (el deploy lo aceptó).
 4. Cambiar contraseñas de los usuarios seed.
 
