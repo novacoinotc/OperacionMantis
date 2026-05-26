@@ -46,13 +46,20 @@ export function MovementsTable({ movements }: { movements: Movement[] }) {
                 <div className="flex items-center gap-2.5">
                   <span
                     className={cn(
-                      "flex size-7 items-center justify-center rounded-full",
+                      "flex size-7 shrink-0 items-center justify-center rounded-full",
                       positive ? "bg-success/15 text-success" : "bg-muted text-muted-foreground",
                     )}
                   >
                     <Icon className="size-3.5" />
                   </span>
-                  <span className="truncate">{m.detail || label}</span>
+                  <div className="min-w-0">
+                    <div className="truncate">{m.detail || label}</div>
+                    {m.clabe ? (
+                      <div className="tabular text-xs text-muted-foreground">
+                        CLABE …{m.clabe.slice(-4)}
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
               </TableCell>
               <TableCell className="text-muted-foreground">{formatDateTime(m.date)}</TableCell>

@@ -85,7 +85,9 @@ export const clientAccounts = pgTable(
 
     // ── Integración NovaCore (por tenant) ──
     novacoreApiKeyPrefix: text("novacore_api_key_prefix"), // 8 chars, identifica tenant en webhook A
-    novacoreClabe: text("novacore_clabe"), // CLABE wallet: depósitos entran, retiros salen
+    novacoreClabe: text("novacore_clabe"), // CLABE de SALIDA (source de los SPEI; informativa)
+    // CLABEs de DEPÓSITO que acreditan a este saldo consolidado.
+    depositClabes: text("deposit_clabes").array(),
     encApiKey: text("enc_api_key"), // AES-256-GCM del api key plaintext
     encWebhookSecret: text("enc_webhook_secret"), // secret webhook C (status retiro)
     encDepositSecret: text("enc_deposit_secret"), // secret webhook A (depósito)

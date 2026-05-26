@@ -76,6 +76,7 @@ async function main() {
       label: "Cuenta Demo",
       novacoreApiKeyPrefix: "MOCK1234",
       novacoreClabe: "684180327002001314",
+      depositClabes: ["684180327002001314"],
       encApiKey: encryptSecret("mock-api-key-plaintext"),
       encWebhookSecret: encryptSecret("mock-webhook-secret"),
       encDepositSecret: encryptSecret("mock-deposit-secret"),

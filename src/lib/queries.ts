@@ -29,26 +29,36 @@ export type Movement = {
   amount: number; // centavos con signo (neto que ve el cliente)
   status: string;
   detail: string;
+  clabe: string | null; // CLABE de entrada (depósitos)
 };
 
-/** Movimientos del cliente. IMPORTANTE: los depósitos muestran SOLO el neto. */
+/**
+ * Movimientos del cliente. IMPORTANTE: los depósitos muestran SOLO el neto.
+ * Si se pasa `clabe`, filtra a los depósitos de esa CLABE (histórico por CLABE).
+ */
 export async function getClientMovements(
   clientAccountId: string,
-  limit = 50,
+  opts?: { limit?: number; clabe?: string },
 ): Promise<Movement[]> {
+  const limit = opts?.limit ?? 50;
+  const depsWhere = opts?.clabe
+    ? and(
+        eq(deposits.clientAccountId, clientAccountId),
+        eq(deposits.beneficiaryAccount, opts.clabe),
+      )
+    : eq(deposits.clientAccountId, clientAccountId);
+
   const [deps, wds] = await Promise.all([
-    db
-      .select()
-      .from(deposits)
-      .where(eq(deposits.clientAccountId, clientAccountId))
-      .orderBy(desc(deposits.createdAt))
-      .limit(limit),
-    db
-      .select()
-      .from(withdrawals)
-      .where(eq(withdrawals.clientAccountId, clientAccountId))
-      .orderBy(desc(withdrawals.createdAt))
-      .limit(limit),
+    db.select().from(deposits).where(depsWhere).orderBy(desc(deposits.createdAt)).limit(limit),
+    // Al filtrar por CLABE solo mostramos depósitos (los retiros no tienen CLABE de entrada).
+    opts?.clabe
+      ? Promise.resolve([])
+      : db
+          .select()
+          .from(withdrawals)
+          .where(eq(withdrawals.clientAccountId, clientAccountId))
+          .orderBy(desc(withdrawals.createdAt))
+          .limit(limit),
   ]);
 
   const movements: Movement[] = [
@@ -59,6 +69,7 @@ export async function getClientMovements(
       amount: d.netAmount, // NUNCA el bruto
       status: "settled",
       detail: d.payerName || "Depósito SPEI",
+      clabe: d.beneficiaryAccount,
     })),
     ...wds.map((w) => ({
       id: w.id,
@@ -70,6 +81,7 @@ export async function getClientMovements(
         w.type === "spei"
           ? `Retiro SPEI · ${w.beneficiaryName || w.beneficiaryAccount || ""}`
           : "Conversión a USDT",
+      clabe: null,
     })),
   ];
 

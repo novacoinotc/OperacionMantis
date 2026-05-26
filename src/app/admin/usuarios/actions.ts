@@ -51,7 +51,20 @@ const clientSchema = z.object({
   email: z.string().email("Correo inválido."),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres."),
   brokerId: z.string().optional(),
-  clabe: z.string().regex(/^\d{18}$/, "La CLABE debe tener 18 dígitos."),
+  depositClabes: z
+    .string()
+    .transform((s) =>
+      s
+        .split(/[\n,]/)
+        .map((x) => x.trim())
+        .filter(Boolean),
+    )
+    .pipe(
+      z
+        .array(z.string().regex(/^\d{18}$/, "Cada CLABE de depósito debe tener 18 dígitos."))
+        .min(1, "Agrega al menos una CLABE de depósito."),
+    ),
+  withdrawalClabe: z.string().regex(/^\d{18}$/, "La CLABE de salida debe tener 18 dígitos."),
   apiKey: z.string().min(8, "API key inválida."),
   depositSecret: z.string().min(8, "deposit_callback_secret inválido."),
   webhookSecret: z.string().min(8, "webhook_secret inválido."),
@@ -71,7 +84,8 @@ export async function createClientAction(_prev: FormState, formData: FormData): 
     email: formData.get("email"),
     password: formData.get("password"),
     brokerId: formData.get("brokerId"),
-    clabe: formData.get("clabe"),
+    depositClabes: formData.get("depositClabes") ?? "",
+    withdrawalClabe: formData.get("withdrawalClabe"),
     apiKey: formData.get("apiKey"),
     depositSecret: formData.get("depositSecret"),
     webhookSecret: formData.get("webhookSecret"),
@@ -107,7 +121,8 @@ export async function createClientAction(_prev: FormState, formData: FormData): 
         userId: u.id,
         label: d.name,
         novacoreApiKeyPrefix: d.apiKey.slice(0, 8),
-        novacoreClabe: d.clabe,
+        novacoreClabe: d.withdrawalClabe,
+        depositClabes: d.depositClabes,
         encApiKey: encryptSecret(d.apiKey),
         encDepositSecret: encryptSecret(d.depositSecret),
         encWebhookSecret: encryptSecret(d.webhookSecret),

@@ -23,7 +23,7 @@ export default async function PanelPage() {
     );
   }
 
-  const movements = await getClientMovements(account.id, 20);
+  const movements = await getClientMovements(account.id, { limit: 20 });
 
   return (
     <div className="space-y-8">

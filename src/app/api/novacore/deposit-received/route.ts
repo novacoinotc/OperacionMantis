@@ -78,9 +78,12 @@ export async function POST(req: NextRequest) {
   }
   const p = parsed.data;
 
-  // La CLABE beneficiaria debe ser la del tenant.
-  if (account.novacoreClabe && p.beneficiaryAccount !== account.novacoreClabe) {
-    return NextResponse.json({ error: "CLABE beneficiaria no coincide" }, { status: 409 });
+  // Solo acreditamos depósitos a las CLABEs monitoreadas del tenant.
+  // Los depósitos a otras CLABEs (ej. la de salidas) se ignoran SIN error,
+  // porque NovaCore dispara el webhook por company_id (todas las CLABEs).
+  const monitored = account.depositClabes ?? [];
+  if (monitored.length > 0 && !monitored.includes(p.beneficiaryAccount)) {
+    return NextResponse.json({ ok: true, skipped: true, reason: "CLABE no monitoreada" });
   }
 
   try {

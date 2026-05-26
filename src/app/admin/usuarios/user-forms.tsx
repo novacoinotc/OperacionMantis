@@ -52,8 +52,10 @@ function BrokerForm() {
 
 function ClientForm({ brokers }: { brokers: Broker[] }) {
   const [state, action, pending] = useActionState<FormState, FormData>(createClientAction, null);
-  const selectClass =
-    "h-9 w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+  const fieldClass =
+    "w-full rounded-lg border border-input bg-transparent px-3 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 dark:bg-input/30";
+  const selectClass = `h-9 ${fieldClass}`;
+  const textareaClass = `${fieldClass} py-2 font-mono`;
 
   return (
     <form action={action} className="space-y-6">
@@ -89,9 +91,29 @@ function ClientForm({ brokers }: { brokers: Broker[] }) {
       <section className="space-y-4">
         <h3 className="text-sm font-medium text-muted-foreground">Credenciales NovaCore</h3>
         <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2 sm:col-span-2">
+            <Label htmlFor="c-depositClabes">CLABEs de depósito (una por línea)</Label>
+            <textarea
+              id="c-depositClabes"
+              name="depositClabes"
+              rows={3}
+              placeholder={"684180327010000022\n684180327010000080\n684180327010000093"}
+              className={textareaClass}
+              required
+            />
+            <p className="text-xs text-muted-foreground">
+              Los depósitos a estas CLABEs suman al saldo consolidado del cliente.
+            </p>
+          </div>
           <div className="space-y-2">
-            <Label htmlFor="c-clabe">CLABE asignada (18 dígitos)</Label>
-            <Input id="c-clabe" name="clabe" inputMode="numeric" required />
+            <Label htmlFor="c-withdrawalClabe">CLABE de salida (source)</Label>
+            <Input
+              id="c-withdrawalClabe"
+              name="withdrawalClabe"
+              inputMode="numeric"
+              placeholder="684180327010000103"
+              required
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="c-payerName">Payer name (CEP)</Label>
@@ -115,7 +137,7 @@ function ClientForm({ brokers }: { brokers: Broker[] }) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="c-maxAmount">Máx. por operación (MXN)</Label>
-            <Input id="c-maxAmount" name="maxAmount" type="number" defaultValue="50000" required />
+            <Input id="c-maxAmount" name="maxAmount" type="number" defaultValue="850000" required />
           </div>
         </div>
       </section>
