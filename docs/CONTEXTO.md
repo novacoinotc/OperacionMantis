@@ -68,17 +68,25 @@ Todo detrás de `src/lib/novacore/` (`CoreClient` real + mock). `USE_MOCK_CORE=1
 - broker `broker@demo.mx` / `Broker#2026`
 - cliente `cliente@demo.mx` / `Cliente#2026` (tiene saldo demo de una prueba)
 
-## Estado
+## Estado — TODAS las fases completas ✅
 
 - ✅ Fase 1 Scaffold + tema dark
 - ✅ Fase 2 Schema + ledger
 - ✅ Fase 3 Auth + roles
 - ✅ Fase 4 CoreBankingAdapter (NovaCore) + mock
 - ✅ Fase 5 Webhook de depósito (**verificado E2E**: 1M → 960k neto + 40k, ledger cuadra, idempotencia OK)
-- ⏳ Fase 6 Dashboards (cliente/broker/admin)
-- ⏳ Fase 7 Retiro SPEI + aprobación + webhook C
-- ⏳ Fase 8 Conversión USDT (Bitso + 5¢)
-- ⏳ Fase 9 Deploy a Vercel
+- ✅ Fase 6 Dashboards (cliente/broker/admin) — top nav + tarjetas
+- ✅ Fase 7 Retiro SPEI + aprobación admin + webhook C
+- ✅ Fase 8 Conversión USDT (Bitso usdt_mxn + 5¢, proceso manual)
+- ✅ Fase 9 Deploy a Vercel
+
+**En producción**: https://www.opmantis.com (alias) · deployment en `issac-villarruels-projects/operacion-mantis`.
+
+### Pendientes operativos (cuando haya cliente real)
+1. **Rotar la contraseña de Neon** (las credenciales se pegaron en el chat).
+2. Quitar `USE_MOCK_CORE=1` en prod y dar de alta el `integration_api_key` real del cliente en NovaCore (CLABE, secrets) vía panel admin — falta construir el alta de cuentas/usuarios desde la UI admin.
+3. Confirmar que el plan de Vercel permite el cron `*/5` (el deploy lo aceptó).
+4. Cambiar contraseñas de los usuarios seed.
 
 ## Mapa de archivos clave
 - `src/db/schema.ts` — 10 tablas + enums + relaciones
