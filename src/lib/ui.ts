@@ -39,6 +39,7 @@ export function statusVariant(status: string): BadgeVariant {
 }
 
 const dtf = new Intl.DateTimeFormat("es-MX", {
+  timeZone: "America/Mexico_City", // hora de Guadalajara (UTC-6), no la del servidor
   day: "2-digit",
   month: "short",
   year: "numeric",
