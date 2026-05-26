@@ -119,7 +119,11 @@ function ClientForm({ brokers }: { brokers: Broker[] }) {
             <Label htmlFor="c-payerName">Payer name (CEP)</Label>
             <Input id="c-payerName" name="payerName" placeholder="RAZÓN SOCIAL S.A. DE C.V." />
           </div>
-          <div className="space-y-2 sm:col-span-2">
+          <div className="space-y-2">
+            <Label htmlFor="c-apiKeyPrefix">API key prefix</Label>
+            <Input id="c-apiKeyPrefix" name="apiKeyPrefix" placeholder="ncapi-XX" required />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="c-apiKey">API key (texto plano)</Label>
             <Input id="c-apiKey" name="apiKey" required />
           </div>
