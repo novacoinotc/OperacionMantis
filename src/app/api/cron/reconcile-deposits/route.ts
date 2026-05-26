@@ -39,8 +39,11 @@ export async function GET(req: NextRequest) {
     try {
       const core = coreClientFor(account);
       const page = await core.listDeposits({ since, status: "completed", limit: 100 });
+      const monitored = account.depositClabes ?? [];
       for (const d of page.deposits) {
         scanned++;
+        // Solo acreditar CLABEs monitoreadas (ignora la de salidas y otras).
+        if (monitored.length > 0 && !monitored.includes(d.beneficiaryAccount)) continue;
         const res = await creditDeposit({
           account,
           trackingKey: d.trackingKey,
