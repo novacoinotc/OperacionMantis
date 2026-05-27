@@ -5,7 +5,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { verifyPassword } from "@/lib/auth/password";
+import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { createSession, homePathForRole } from "@/lib/auth";
 
 const schema = z.object({
@@ -15,6 +15,9 @@ const schema = z.object({
 });
 
 export type LoginState = { error?: string } | null;
+
+const LOCK_THRESHOLD = 8; // intentos fallidos antes de bloquear
+const LOCK_MINUTES = 15; // duración del bloqueo
 
 export async function loginAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
   const parsed = schema.safeParse({
@@ -31,8 +34,33 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     .where(eq(users.email, email.toLowerCase()))
     .limit(1);
 
-  if (!user || !user.isActive || !verifyPassword(password, user.passwordHash)) {
+  // Usuario inexistente/inactivo: quema cómputo similar para no filtrar por tiempo.
+  if (!user || !user.isActive || !user.passwordHash) {
+    hashPassword(password);
     return { error: "Credenciales incorrectas." };
+  }
+
+  // Bloqueo temporal por intentos fallidos.
+  if (user.lockedUntil && user.lockedUntil.getTime() > Date.now()) {
+    return { error: "Demasiados intentos fallidos. Intenta de nuevo en unos minutos." };
+  }
+
+  if (!verifyPassword(password, user.passwordHash)) {
+    const attempts = user.failedLoginAttempts + 1;
+    const locked = attempts >= LOCK_THRESHOLD ? new Date(Date.now() + LOCK_MINUTES * 60_000) : null;
+    await db
+      .update(users)
+      .set({ failedLoginAttempts: attempts, lockedUntil: locked })
+      .where(eq(users.id, user.id));
+    return { error: "Credenciales incorrectas." };
+  }
+
+  // Éxito: limpia el contador si hacía falta.
+  if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+    await db
+      .update(users)
+      .set({ failedLoginAttempts: 0, lockedUntil: null })
+      .where(eq(users.id, user.id));
   }
 
   await createSession(user.id);

@@ -69,6 +69,8 @@ export const users = pgTable(
       onDelete: "set null",
     }),
     passwordHash: text("password_hash"), // por si se usa auth con credenciales
+    failedLoginAttempts: integer("failed_login_attempts").notNull().default(0),
+    lockedUntil: timestamp("locked_until", { withTimezone: true }),
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),

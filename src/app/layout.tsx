@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     template: "%s · Operación Mantis",
   },
   description: "Panel de tesorería: depósitos, saldo disponible, retiros SPEI y USDT.",
+  robots: { index: false, follow: false }, // app privada: que ningún buscador la liste
 };
 
 export const viewport: Viewport = {
