@@ -22,6 +22,13 @@
       "when": 1779834197131,
       "tag": "0002_open_vin_gonzales",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1779841274439,
+      "tag": "0003_harsh_skin",
+      "breakpoints": true
     }
   ]
 }

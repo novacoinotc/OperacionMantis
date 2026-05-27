@@ -14,6 +14,21 @@ import { ledgerTotals } from "@/lib/ledger";
 /* ── Cliente ───────────────────────────────────────────────────── */
 
 export async function getClientAccountByUserId(userId: string): Promise<ClientAccount | null> {
+  // Login adicional que comparte la cuenta de otro cliente.
+  const [u] = await db
+    .select({ accountId: users.clientAccountId })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (u?.accountId) {
+    const [shared] = await db
+      .select()
+      .from(clientAccounts)
+      .where(eq(clientAccounts.id, u.accountId))
+      .limit(1);
+    if (shared) return shared;
+  }
+  // Cuenta propia (dueño).
   const [acc] = await db
     .select()
     .from(clientAccounts)

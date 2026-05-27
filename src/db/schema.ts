@@ -64,6 +64,10 @@ export const users = pgTable(
     brokerId: uuid("broker_id").references((): AnyPgColumn => users.id, {
       onDelete: "set null",
     }),
+    // Login adicional que COMPARTE la cuenta de otro cliente (no es el dueño).
+    clientAccountId: uuid("client_account_id").references((): AnyPgColumn => clientAccounts.id, {
+      onDelete: "set null",
+    }),
     passwordHash: text("password_hash"), // por si se usa auth con credenciales
     isActive: boolean("is_active").notNull().default(true),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
