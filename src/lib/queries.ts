@@ -55,6 +55,7 @@ export type Movement = {
   usdtRate: string | null;
   usdtAddress: string | null;
   usdtTxHash: string | null;
+  settledAt: Date | null; // fecha de liquidación del banco (depósitos)
 };
 
 /**
@@ -90,7 +91,9 @@ export async function getClientMovements(
     ...deps.map((d) => ({
       id: d.id,
       kind: "deposit" as const,
-      date: d.receivedAt ?? d.createdAt,
+      // Ordena y muestra por llegada al sistema (lo más nuevo arriba, hora GMT-6
+      // congruente). La hora de liquidación del banco va en settledAt (detalle).
+      date: d.createdAt,
       // El cliente ve el depósito TAL CUAL llegó (bruto), para que cuadre con su
       // comprobante. La comisión se refleja solo en el saldo disponible (neto).
       amount: d.grossAmount,
@@ -106,6 +109,7 @@ export async function getClientMovements(
       usdtRate: null,
       usdtAddress: null,
       usdtTxHash: null,
+      settledAt: d.receivedAt,
     })),
     ...wds.map((w) => ({
       id: w.id,
@@ -127,6 +131,7 @@ export async function getClientMovements(
       usdtRate: w.effectiveRate,
       usdtAddress: w.usdtAddress,
       usdtTxHash: w.usdtTxHash,
+      settledAt: null,
     })),
   ];
 

@@ -83,6 +83,10 @@ export function MovementDetailButton({ m }: { m: Movement }) {
 
           <div className="mt-4">
             <DetailRow label="Fecha" value={formatDateTime(m.date)} />
+            <DetailRow
+              label="Liquidado en (banco)"
+              value={m.settledAt ? formatDateTime(m.settledAt) : null}
+            />
             <DetailRow label="Concepto" value={m.concept} />
             <DetailRow
               label={m.kind === "deposit" ? "Pagador" : "Beneficiario"}
